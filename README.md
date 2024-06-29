@@ -1,113 +1,45 @@
-# ChatGPT Python API for sales
+# Krishi Sahayak
 
-This is an AI app to find **real-time** discounts/deals/sales prices from various online markets around the world. The project
-exposes an HTTP REST endpoint to answer user queries about current sales like [Amazon deals](https://www.amazon.com/gp/goldbox?ref_=nav_cs_gb) in a specific location or from the given any input file such as (CSV, Jsonlines, PDF, Markdown, Txt). It uses Pathway’s [LLM App features](https://github.com/pathwaycom/llm-app) to build real-time LLM(Large Language Model)-enabled data pipeline in Python and join data from multiple input sources, leverages OpenAI API [Embeddings](https://platform.openai.com/docs/api-reference/embeddings) and [Chat Completion](https://platform.openai.com/docs/api-reference/completions) endpoints to generate AI assistant responses.
+Kishan Sahayak is an innovative AI app designed to empower the agriculture industry by providing insightful answers to farmers' questions about improving their agricultural practices and protecting their crops. Leveraging JSON lines of data on soil, fertilizers, and crops, and integrating real-time weather and soil data through APIs, the app offers tailored and precise advice to enhance productivity and sustainability.
 
-Currently, the project supports two types of data sources and it is **possible to extend sources** by adding custom input connectors:
-
-- Jsonlines - The Data source expects to have a `doc` object for each line. Make sure that you convert your input data first to Jsonlines. See a sample data in [discounts.jsonl](/examples/data/csv_discounts.jsonl)
-- [Rainforest Product API](https://www.rainforestapi.com/docs/product-data-api/overview).
+This app uses various jsonl data on different soil, temperature, yeild, crop, fertilizer, nutrient which has been took from Kaggle dataset
 
 ## Features
 
-- Retrieves the latest deals from various sources.
-- Provides an API interface to explore these deals.
+- Real-time Weather and Soil Data: Integrates live data through APIs to provide current and location-specific recommendations.
 - Offers user-friendly UI with [Streamlit](https://streamlit.io/).
-- Filters and presents deals based on user queries or chosen data sources.
+- AI-Driven Insights: Uses Pathway’s LLM App features to build a real-time LLM-enabled data pipeline in Python, joining data from multiple sources.
 - Data and code reusability for offline evaluation. User has the option to choose to use local (cached) or real data.
-- Extend data sources: Using Pathway's built-in connectors for JSONLines, CSV, Kafka, Redpanda, Debezium, streaming APIs, and more.
+- Diverse Agricultural Data: Utilizes various JSON lines of data on different soil types, temperature, yield, crops, fertilizers, and nutrients sourced from Kaggle datasets.
+- High-Quality Input through APIs: Allows for the integration of high-quality and various types of input data through APIs, enhancing the app's flexibility and accuracy and tailored to user need.
 
 ## Further Improvements
 
 There are more things you can achieve and here are upcoming features:
 
-- Incorporate additional data from external APIs, along with various files (such as Jsonlines, PDF, Doc, HTML, or Text format), databases like PostgreSQL or MySQL, and stream data from platforms like Kafka, Redpanda, or Debedizum.
+- Incorporate image based soil recognizition using satellite imagery from open weather api and classified dataset in kaggle
 - Merge data from these sources instantly.
 - Convert any data to jsonlines.
-- Maintain a data snapshot to observe variations in sales prices over time, as Pathway provides a built-in feature to compute **differences** between two alterations.
+- Maintain a data snapshot to observe variations in soils-quality and yeild over time, as Pathway provides a built-in feature to compute **differences** between two alterations.
+- We can also use web-scrapper to feed data on fertilizer in market and fetch their price and availabilty.
 - Beyond making data accessible via API or UI, the LLM App allows you to relay processed data to other downstream connectors, such as BI and analytics tools. For instance, set it up to **receive alerts** upon detecting price shifts.
 
 ## Demo
 
-In case you use Rainforest API as a data source for the project, it provides real-time deals for Amazon products.
-When the user has the following query in the API request:
+As we are using location based weather and soil api it could deliver tailored results to users:
 
 ```text
-Can you find me discounts this week for Adidas men's shoes?
+
 ```
 
-You will get the response with some discounts available in Amazon market:
+You will get the response:
 
-![LLM App responds with discounts from Amazon](/assets/LLM%20App%20v1.gif)
+<!-- ![LLM App responds with discounts from Amazon](/assets/LLM%20App%20v1.gif) -->
 
-As evident, ChatGPT interface offers general advice on locating discounts but lacks specificity regarding where or what type of discounts, among other details:
+As evident, ChatGPT interface offers general advice on agriculture but lacks specificity regarding the current location of the user and the soil type of that area, among other details:
 
-![ChatGPT needs custom data](/assets/ChatGPT%20Discounts%20V1.gif)
+<!-- ![ChatGPT needs custom data](/assets/ChatGPT%20Discounts%20V1.gif) -->
 
-## Code sample
-
-It requires only few lines of code to build a real-time AI-enabled data pipeline:
-
-```python
-# Given a user question as a query from your API
-query, response_writer = pw.io.http.rest_connector(
-    host=host,
-    port=port,
-    schema=QueryInputSchema,
-    autocommit_duration_ms=50,
-)
-# Real-time data coming from external data sources such as jsonlines file
-sales_data = pw.io.jsonlines.read(
-    "./examples/data",
-    schema=DataInputSchema,
-    mode="streaming"
-)
-# Compute embeddings for each document using the OpenAI Embeddings API
-embedded_data = embeddings(context=sales_data, data_to_embed=sales_data.doc)
-# Construct an index on the generated embeddings in real-time
-index = index_embeddings(embedded_data)
-# Generate embeddings for the query from the OpenAI Embeddings API
-embedded_query = embeddings(context=query, data_to_embed=pw.this.query)
-# Build prompt using indexed data
-responses = prompt(index, embedded_query, pw.this.query)
-# Feed the prompt to ChatGPT and obtain the generated answer.
-response_writer(responses)
-# Run the pipeline
-pw.run()
-```
-
-## Use case
-
-[Open AI GPT](https://openai.com/gpt-4) excels at answering questions, but only on topics it remembers from its training data. If you want GPT to answer questions about unfamiliar topics such as:
-
-- Recent events after Sep 2021.
-- Your non-public documents.
-- Information from past conversations.
-- Real-time data.
-- Including discount information.
-
-The model might not answer such queries properly. Because it is not aware of the context or historical data or it needs additional details. In this case, you can use LLM App efficiently to give context to this search or answer process.  See how LLM App [works](https://github.com/pathwaycom/llm-app#how-it-works).
-
-For example, a typical response you can get from the OpenAI [Chat Completion endpoint](https://platform.openai.com/docs/api-reference/chat) or [ChatGPT UI](https://chat.openai.com/) interface without context is:
-
-```text
-User: Find discounts in the USA
-
-Assistant: Sure! Here are some ways to find discounts
-in the USA :\n\n1. Coupon Websites: Websites like RetailMeNot, 
-Coupons.com and Groupon offer a wide range of discounts
-and coupon codes for various products and services.\n\n2.
-```
-
-As you can see, GPT responds only with suggestions on how to find discounts but it is not specific and does not provide exactly where or what kind of discount and so on.
-
-To help the model, we give knowledge of discount information from any reliable data source (it can be JSON document, APIs, or data stream in Kafka) to get a more accurate answer. Assume that there is a `discounts.csv` file with the following columns of data: *discount_until, country, city, state, postal_code ,region, product_id, category, sub_category, brand, product_name, currency,actual_price ,discount_price, discount_percentage ,address*.
-
-After we give this knowledge to GPT using UI (applying a data source), look how it replies:
-
-![Discounts two data sources](/assets/Discounts%20two%20data%20sources.gif)
-
-The app takes both [Rainforest API](https://www.rainforestapi.com/docs/product-data-api/overview) and `discounts.csv` file and indexed documents into account and uses this data when processing queries. The cool part is, the app is always aware of changes in the discounts. If you add another CSV file or data source, the LLM app does magic and automatically updates the AI model's response.
 
 ## How the project works
 
@@ -150,13 +82,13 @@ Then, follow the easy steps to install and get started using the sample app.
 This is done with the `git clone` command followed by the URL of the repository:
 
 ```bash
-git clone https://github.com/Boburmirzo/chatgpt-api-python-sales.git
+git clone https://github.com/Jitmandal051004/Sahayak_LLMApp
 ```
 
 Next,  navigate to the project folder:
 
 ```bash
-cd chatgpt-api-python-sales
+cd Sahayak_LLMApp
 ```
 
 ### Step 2: Set environment variables
@@ -164,7 +96,7 @@ cd chatgpt-api-python-sales
 Create `.env` file in the root directory of the project, copy and paste the below config, and replace the `{OPENAI_API_KEY}` configuration value with your key. 
 
 ```bash
-OPENAI_API_TOKEN={OPENAI_API_KEY}
+OPENAI_API_TOKEN=<YOUR_API_KEY>
 HOST=0.0.0.0
 PORT=8080
 EMBEDDER_LOCATOR=text-embedding-ada-002
@@ -172,14 +104,11 @@ EMBEDDING_DIMENSION=1536
 MODEL_LOCATOR=gpt-3.5-turbo
 MAX_TOKENS=200
 TEMPERATURE=0.0
-```
 
-Optionally, you change other values. By default, the app uses [Mock API response](https://run.mocky.io/v3/f17d8811-09ff-4ba6-8d14-31ef972ce6cd/request) to simulate the response from Rainforest API. If you need actual data, you need to specify also `{RAINFOREST_BASE_URL}` and `{RAINFOREST_API_KEY}`.
-
-```bash
-RAINFOREST_BASE_URL={RAINFOREST_BASE_URL}
-RAINFOREST_API_KEY={RAINFOREST_API_KEY}
+GEOCODE_API_KEY=<YOUR_API_KEY>
+WEATHER_API_KEY=<YOUR_API_KEY> 
 ```
+You can https://rest.isric.org/soilgrids/v2.0/docs#/default/query_layer_properties_properties_query_get to generate your geocode api key
 
 ### Step 3: Install the app dependencies
 
