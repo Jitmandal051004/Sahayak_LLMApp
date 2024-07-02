@@ -1,44 +1,44 @@
 # Krishi Sahayak
 
-Kishan Sahayak is an innovative AI app designed to empower the agriculture industry by providing insightful answers to farmers' questions about improving their agricultural practices and protecting their crops. Leveraging JSON lines of data on soil, fertilizers, and crops, and integrating real-time weather and soil data through APIs, the app offers tailored and precise advice to enhance productivity and sustainability.
+Kishan Sahayak is an innovative AI app designed to empower the farmers by providing insightful answers to their day to day questions about improving their agricultural practices and protecting their crops. Leveraging JSON lines of data on soil, fertilizers, and crops, and integrating real-time weather and soil data through APIs, the app offers tailored and precise advice to enhance productivity and sustainability.
 
-This app uses various jsonl data on different soil, temperature, yeild, crop, fertilizer, nutrient which has been took from Kaggle dataset
+This app uses various jsonl data on different soil, temperature, yeild, crop, fertilizer, nutrient which has been took from Kaggle dataset.
 
 ## Features
 
 - Real-time Weather and Soil Data: Integrates live data through APIs to provide current and location-specific recommendations.
-- Offers user-friendly UI with [Streamlit](https://streamlit.io/).
-- AI-Driven Insights: Uses Pathway’s LLM App features to build a real-time LLM-enabled data pipeline in Python, joining data from multiple sources.
+- AI-Driven Insights: Uses Pathway, Hugging-Face Model and LiteLLM to build a real-time LLM-enabled data pipeline in Python, supporting live streaming, and user centric responses from generative AI Models without the need of fine-tuning model and saving money.
 - Data and code reusability for offline evaluation. User has the option to choose to use local (cached) or real data.
-- Diverse Agricultural Data: Utilizes various JSON lines of data on different soil types, temperature, yield, crops, fertilizers, and nutrients sourced from Kaggle datasets.
+- Open-Source Model: uses model from Hugging-Face ensuring user have variety vendor to pick from.
+- Diverse Agricultural Data: Utilizes various JSON lines of data on different soil types, temperature, yield, crops, fertilizers, and nutrients sourced from Kaggle datasets and also from various API so that user can have answer meant for them.
 - High-Quality Input through APIs: Allows for the integration of high-quality and various types of input data through APIs, enhancing the app's flexibility and accuracy and tailored to user need.
 
 ## Further Improvements
 
-There are more things you can achieve and here are upcoming features:
+There are many things and features that can be integrated with this such as:
 
-- Incorporate image based soil recognizition using satellite imagery from open weather api and classified dataset in kaggle
-- Merge data from these sources instantly.
-- Convert any data to jsonlines.
+- Incorporate image based soil recognizition using satellite imagery from open weather api with POLYGON ID and classified dataset in kaggle
+- Make it more user-friendly by using MERN stack.
+- Integrating more Data Sources in the pipeline with help of Pathway.
 - Maintain a data snapshot to observe variations in soils-quality and yeild over time, as Pathway provides a built-in feature to compute **differences** between two alterations.
 - We can also use web-scrapper to feed data on fertilizer in market and fetch their price and availabilty.
 - Beyond making data accessible via API or UI, the LLM App allows you to relay processed data to other downstream connectors, such as BI and analytics tools. For instance, set it up to **receive alerts** upon detecting price shifts.
+- Make it more fast and safe from server failure because of loading of model.
+- Because of **rounding off of coordinate**, not good at handling request for coastal places such as mumbai.
+- It need to be Dockerized so that user in WINDOWS can also use it.
 
 ## Demo
 
 As we are using location based weather and soil api it could deliver tailored results to users:
+Here is the of How to run it:
 
-```text
+![Whole_workflow](./assets/whole_workflow.gif)
 
-```
-
-You will get the response:
-
-<!-- ![LLM App responds with discounts from Amazon](/assets/LLM%20App%20v1.gif) -->
+**NOTE** - for better visibility you can download or preview whole workflow from [here](./assets/whole_workflow.mp4)
 
 As evident, ChatGPT interface offers general advice on agriculture but lacks specificity regarding the current location of the user and the soil type of that area, among other details:
 
-<!-- ![ChatGPT needs custom data](/assets/ChatGPT%20Discounts%20V1.gif) -->
+![ChatGPT needs custom data](./assets/chatgpt_response-ezgif.gif)
 
 
 ## How the project works
@@ -46,34 +46,29 @@ As evident, ChatGPT interface offers general advice on agriculture but lacks spe
 The sample project does the following procedures to achieve the above output:
 
 1. Prepare search data:
-    1. Generate: [discounts-data-generator.py](/examples/csv/discounts-data-generator.py) simulates real-time data coming from external data sources and generates/updates existing `discounts.csv` file with random data. There is also cron job is running using [Crontab](https://pypi.org/project/python-crontab/) and it runs every min to fetch latest data from Rainforest API.
-    2. Collect: You choose a data source or upload the CSV file through the UI file-uploader and it maps each row into a jsonline schema for better managing large data sets.
-    3. Chunk: Documents are split into short, mostly self-contained sections to be embedded.
-    4. Embed: Each section is [embedded](https://platform.openai.com/docs/guides/embeddings) with the OpenAI API and retrieve the embedded result.
+    1. Dataset: It contains dataset on the crop, soil, yeild, fertilizer dataset fetched from **Kaggle**. you can see it [here](./examples/data/)
+    2. Fetch the soil and weather data based on user request: [utility_function.py](./examples/ui/utility_function.py) fetch data from api clean it and make it ready to be sent with prompt in a concise manner.
+    3. Chunk: Documents are shortened, mostly self-contained sections to be embedded. user can choose thier embedding model by just changing the name of embedder_locator in [genai_helper](./common/genai_helper.py) and in .env file
+    4. Embed: Each section is [embedded](https://docs.litellm.ai/docs/embedding/supported_embedding) with the help of **LiteLLM and Hugging Face Model** and retrieve the embedded result.
     5. Indexing: Constructs an index on the generated embeddings.
 2. Search (once per query)
-    1. Given a user question, generate an embedding for the query from the OpenAI API.
+    1. Given a user question, do a proper prompting and give clean data fetched from **OpenCagedData** for approx lat and lon of that place, **Soilgrids by isric.org** for details about the soil at that coordinate, **openweathermap.org** for weather of that region, generate an embedding for the query from the Open source AI model API by [Hugging-Face](https://huggingface.co/).
     2. Using the embeddings, retrieve the vector index by relevance to the query
 3. Ask (once per query)
-    1. Insert the question and the most relevant sections into a message to GPT
-    2. Return GPT's answer
+    1. Insert the location and question to ask.
+    2. Similarly you can change your model by just changing the name of model_locator in [genai_helper](./common/genai_helper.py) and in .env file.
+    2. Return AI model's answer
 
 ## How to run the project
 
-Example only supports Unix-like systems (such as Linux, macOS, BSD). If you are a Windows user, we highly recommend leveraging Windows Subsystem for Linux (WSL) or Dockerize the app to run as a container.
-
-### Run with Docker
-
-1. [Set environment variables](#step-2-set-environment-variables)
-2. From the project root folder, open your terminal and run `docker compose up`.
-3. Navigate to `localhost:8501` on your browser when docker installion is successful.
+Example only supports Unix-like systems (such as Linux, macOS, BSD).
 
 ### Prerequisites
 
 1. Make sure that [Python](https://www.python.org/downloads/) 3.10 or above installed on your machine.
 2. Download and Install [Pip](https://pip.pypa.io/en/stable/installation/) to manage project packages.
-3. Create an [OpenAI](https://openai.com/) account and generate a new API Key: To access the OpenAI API, you will need to create an API Key. You can do this by logging into the [OpenAI website](https://openai.com/product) and navigating to the API Key management page.
-4. (Optional): if you use Rainforest API as a data source, create an [Rainforest](https://www.rainforestapi.com/) account and get a new API Key. Refer to Rainforest API [documentation](https://www.rainforestapi.com/docs).
+3. Create an [Hugging-Face](https://huggingface.co/) account and generate a new API Key: To access the Open source AI API, you will need to create an API Key.
+4. Create API key for **openweathermap.org** and **OpenCagedData**. **Soilgrids by isric.org** does not need an API key.
 
 Then, follow the easy steps to install and get started using the sample app.
 
@@ -93,22 +88,21 @@ cd Sahayak_LLMApp
 
 ### Step 2: Set environment variables
 
-Create `.env` file in the root directory of the project, copy and paste the below config, and replace the `{OPENAI_API_KEY}` configuration value with your key. 
+Create `.env` file in the root directory of the project, copy and paste the below config and give your API keys 
 
 ```bash
-OPENAI_API_TOKEN=<YOUR_API_KEY>
 HOST=0.0.0.0
 PORT=8080
-EMBEDDER_LOCATOR=text-embedding-ada-002
-EMBEDDING_DIMENSION=1536
-MODEL_LOCATOR=gpt-3.5-turbo
-MAX_TOKENS=200
+EMBEDDER_LOCATOR=huggingface/microsoft/codebert-base
+EMBEDDING_DIMENSION=768
+MODEL_LOCATOR=huggingface/codellama/CodeLlama-34b-Instruct-hf
+MAX_TOKENS=1000
 TEMPERATURE=0.0
 
-GEOCODE_API_KEY=<YOUR_API_KEY>
-WEATHER_API_KEY=<YOUR_API_KEY> 
+HuggingFace_API_KEY={HuggingFace_API_KEY}
+GEOCODE_API_KEY={GEOCODE_API_KEY}
+WEATHER_API_KEY={WEATHER_API_KEY}
 ```
-You can https://rest.isric.org/soilgrids/v2.0/docs#/default/query_layer_properties_properties_query_get to generate your geocode api key
 
 ### Step 3: Install the app dependencies
 
@@ -135,46 +129,36 @@ python main.py
 
 When the application runs successfully, you should see output something like this:
 
-![pathway_progress_dashboard](/assets/pathway_progress_dashboard.png)
+**Before Streamlit starts:**
+![Before Server Starts](./assets/Before_server_start.png)
 
 ### Step 6: Run Streamlit UI for file upload
 
 You can run the UI separately by navigating to `cd examples/ui` and running Streamlit app
 `streamlit run app.py` command. It connects to the Discounts backend API automatically and you will see the UI frontend is running http://localhost:8501/ on a browser:
 
-![screenshot_ui_streamlit](/assets/streamlit_ui_pathway.png)
+![screenshot_ui_streamlit](/assets/streamlit.png)
 
-## Test the sample app
+**After Streamlit Starts:**
+![After Server Starts](./assets/After_Server_start.png)
 
-Assume that you choose CSV as a data source and we have this entry on the CSV file (this can be any CSV file where the first row has column names separated by commas):
+### Test the sample app
 
-| discount_until | country | city | state | postal_code | region | product_id | category | sub_category | brand | product_name | currency | actual_price | discount_price | discount_percentage | address |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2024-08-09 | USA | Los Angeles | IL | 22658 | Central | 7849 | Footwear | Men Shoes | Nike | Formal Shoes | USD | 130.67 | 117.60 | 10 | 321 Oak St |
+Open the web Browser and paste the URL http://localhost:8501/, put location and put your query.
 
-When the user uploads this file to the file uploader and asks questions:
+**NOTE** - In case the app shows Connection Lost error after entering question because of Model loading just restart the server by again running 
 
-```text
-Can you find me discounts this month for Nikes men shoes?
-```
+## Credits :
 
-You will get the response as its expected on the UI.
+### Resources :
+- [HuggingFace_Documentation](https://huggingface.co/docs)
+- [LiteLLM_Doc](https://docs.litellm.ai/docs/)
+- [Pathway_Doc](https://pathway.com/developers/user-guide/introduction/welcome)
+- [OpenCagedData](https://opencagedata.com/api#quickstart)
+- [Soilgrids by isric.org](https://rest.isric.org/soilgrids/v2.0/docs#/default/query_layer_properties_properties_query_get)
+- [openweathermap.org](https://openweathermap.org/api)
 
-```text
-"Based on the given data, there is one discount available this month for Nike's men shoes. Here are the details::
-
-Discounts this week for Nike's men shoes:
-
-City: Los Angeles
-Ship Mode: Second Class
-Postal Code: 22658
-Category: Footwear
-Sub-category: Men Shoes
-Brand: Nike
-Product Name: Formal Shoes
-Formal Shoes
-Actual Price: $130.67
-Discounted Price: $117.60
-Discount Percentage: 10%
-Ship Date: 2024-08-09
-```
+### Special Thanks :
+- [Pathway and DEVSOC](https://devsoc-bits-goa.gitbook.io/rag-and-llm-bootcamp) - for having this workshop, learnt a lot from this documentation and opened a lot of venue for me.
+- [Boburmizo- ChatGPT API Python sales app](https://github.com/Boburmirzo/chatgpt-api-python-sales) - helped me a lot in building the pipeline for my model.
+- [AeroIntel by Alphawarrior21](https://github.com/Alphawarrior21/AeroIntel) - It helped me a lot in the process of Ideation for my project.

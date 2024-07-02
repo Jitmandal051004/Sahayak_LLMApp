@@ -3,6 +3,11 @@ import pathway as pw
 from common.embedder import embeddings, index_embeddings
 from common.prompt import prompt
 
+class DataInputSchema(pw.Schema):
+    doc: str
+
+class QueryInputSchema(pw.Schema):
+    query: str
 
 def run(host, port):
     # Given a user question as a query from your API
@@ -39,9 +44,4 @@ def run(host, port):
     pw.run()
 
 
-class DataInputSchema(pw.Schema):
-    doc: str
 
-
-class QueryInputSchema(pw.Schema):
-    query: str

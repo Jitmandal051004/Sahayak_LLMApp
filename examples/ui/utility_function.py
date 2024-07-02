@@ -1,6 +1,5 @@
 import requests
 import json
-from tenacity import retry, wait_exponential, stop_after_attempt, RetryError
 
 def get_lat_lon(location_name, api_key):
     url = f"https://api.opencagedata.com/geocode/v1/json?q={location_name}&key={api_key}"
@@ -85,9 +84,3 @@ def format_prompt(data):
     prompt = f"Question: {question}\nLocation: {location_name}\nBulk Density: {bulk_den}kilograms per cubic decimeter\nTotal Nitrogen: {nitrogen} g/kg\npH of Soil: {ph}\nSoil Organic Carbon: {soc} g/kg\nClay Percentage: {clay}%\nSand Percentage: {sand}%\nSilt Percentage: {silt}%"
     return prompt
 
-@retry(wait=wait_exponential(multiplier=1, min=4, max=10), stop=stop_after_attempt(5))
-def fetch_data_from_server(url):
-    response = requests.get(url)
-    if response.status_code != 200:
-        raise ValueError("Server is not ready yet.")
-    return response.json()
