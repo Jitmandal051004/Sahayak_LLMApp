@@ -34,7 +34,7 @@ Here is the of How to run it:
 
 ![Whole_workflow](./assets/sahayakShort.gif)
 
-**NOTE** - for better visibility you can download or preview whole workflow from [here](./assets/whole_workflow.mp4)
+**NOTE** - for better visibility you can download or preview whole workflow from [here](./assets/sahayakShort.mp4)
 
 As evident, ChatGPT interface offers general advice on agriculture but lacks specificity regarding the current location of the user and the soil type of that area, among other details:
 
