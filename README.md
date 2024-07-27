@@ -32,7 +32,7 @@ There are many things and features that can be integrated with this such as:
 As we are using location based weather and soil api it could deliver tailored results to users:
 Here is the of How to run it:
 
-![Whole_workflow](./assets/whole_workflow.gif)
+![Whole_workflow](./assets/sahayakShort.gif)
 
 **NOTE** - for better visibility you can download or preview whole workflow from [here](./assets/whole_workflow.mp4)
 
